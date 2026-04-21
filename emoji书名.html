@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界读书日：看Emoji猜书名</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .game-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .top-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .progress { color: #3498db; }
+        .timer { color: #e74c3c; background: #fadbd8; padding: 5px 10px; border-radius: 6px; }
+        .emoji-display {
+            font-size: 48px;
+            margin: 20px 0;
+            letter-spacing: 5px;
+        }
+        .keywords {
+            font-size: 18px;
+            color: #e67e22;
+            margin-bottom: 20px;
+            font-weight: bold;
+            display: none;
+            min-height: 24px;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            outline: none;
+            text-align: center;
+        }
+        input[type="text"]:focus {
+            border-color: #3498db;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        button {
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        button:hover { opacity: 0.8; }
+        .btn-submit { background-color: #2ecc71; width: 100%; font-size: 16px; padding: 12px; margin-bottom: 10px; }
+        .btn-hint { background-color: #f39c12; }
+        .btn-skip { background-color: #3498db; }
+        .btn-end { background-color: #e74c3c; }
+        
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+        .correct { color: #2ecc71; }
+        .wrong { color: #e74c3c; }
+        #result-screen { display: none; }
+        .final-score { font-size: 32px; color: #e74c3c; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="game-container" id="game-screen">
+    <h1>📚 看Emoji猜书名</h1>
+    <div class="subtitle">直接答对+2分，使用提示+1分</div>
+    
+    <div class="top-info">
+        <div class="progress">题目: <span id="current-q">1</span> / 17</div>
+        <div class="timer" id="timer-display">15:00</div>
+    </div>
+    
+    <div class="emoji-display" id="emoji"></div>
+    <div class="keywords" id="keywords"></div>
+    
+    <input type="text" id="answer-input" placeholder="请输入书名 (无需书名号)" autocomplete="off">
+    
+    <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+    
+    <div class="btn-group">
+        <button class="btn-hint" id="hint-btn" onclick="showHint()">💡 提示</button>
+        <button class="btn-skip" onclick="skipQuestion()">⏭️ 跳过</button>
+        <button class="btn-end" onclick="endGame()">🛑 结束游戏</button>
+    </div>
+    
+    <div class="feedback" id="feedback"></div>
+</div>
+
+<div class="game-container" id="result-screen">
+    <h1>🎉 游戏结束！</h1>
+    <div class="final-score">本轮得分: <span id="score">0</span> / 34</div>
+    <p id="evaluation"></p>
+    <button class="btn-submit" onclick="location.reload()">再玩一次</button>
+</div>
+
+<script>
+    let questions = [
+        { emoji: "⬅️🚶‍♂️📓", keywords: "石猴、取经、八十一难", answer: "西游记" },
+        { emoji: "🕒🍲🧂👨‍⚕️", keywords: "桃园结义、赤壁、三分天下", answer: "三国演义" },
+        { emoji: "🔴🏢💭", keywords: "宝黛、大观园、石头记", answer: "红楼梦" },
+        { emoji: "💧🏞️📜", keywords: "梁山、一百零八将、替天行道", answer: "水浒传" },
+        { emoji: "🤏👑🧒", keywords: "B612星球、狐狸、玫瑰", answer: "小王子" },
+        { emoji: "👴🤝🌊", keywords: "圣地亚哥、出海、马林鱼", answer: "老人与海" },
+        { emoji: "💓🧍‍♂️", keywords: "福贵、苦难、韧性", answer: "活着" },
+        { emoji: "💯🗓️👤😔", keywords: "马孔多、七代人、宿命", answer: "百年孤独" },
+        { emoji: "🐛🔄📖", keywords: "格里高尔、甲虫、异化", answer: "变形记" },
+        { emoji: "🤴💀⚔️", keywords: "丹麦王子、装疯、复仇", answer: "哈姆雷特" },
+        { emoji: "🛡️🐎🌪️", keywords: "骑士、风车、桑丘", answer: "堂吉诃德" },
+        { emoji: "😐🌍", keywords: "孙少平、黄土高原、奋斗", answer: "平凡的世界" },
+        { emoji: "🏞️🧱", keywords: "茶峒、渡船、翠翠", answer: "边城" },
+        { emoji: "👍👍👨🏻‍💼", keywords: "盖茨比、绿光、爵士时代", answer: "了不起的盖茨比" },
+        { emoji: "🌾🌾👀🧑", keywords: "霍尔顿、红色猎人帽、叛逆", answer: "麦田里的守望者" },
+        { emoji: "🍃🌬️", keywords: "斯嘉丽、白瑞德、南北战争", answer: "飘" },
+        { emoji: "✂️❤️", keywords: "桑菲尔德庄园、阁楼、家庭教师", answer: "简爱" }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let timerId;
+    let timeLeft = 15 * 60;
+    let hintUsed = false; 
+
+    const emojiEl = document.getElementById('emoji');
+    const keywordsEl = document.getElementById('keywords');
+    const currentQEl = document.getElementById('current-q');
+    const inputEl = document.getElementById('answer-input');
+    const feedbackEl = document.getElementById('feedback');
+    const hintBtn = document.getElementById('hint-btn');
+    const timerDisplay = document.getElementById('timer-display');
+
+    function shuffleQuestions() {
+        for (let i = questions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [questions[i], questions[j]] = [questions[j], questions[i]];
+        }
+    }
+
+    function startTimer() {
+        timerId = setInterval(() => {
+            timeLeft--;
+            let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            let s = (timeLeft % 60).toString().padStart(2, '0');
+            timerDisplay.innerText = m + ":" + s;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function loadQuestion() {
+        if (currentIndex < questions.length) {
+            emojiEl.innerText = questions[currentIndex].emoji;
+            keywordsEl.innerText = questions[currentIndex].keywords;
+            
+            keywordsEl.style.display = 'none';
+            hintBtn.style.display = 'inline-block';
+            currentQEl.innerText = currentIndex + 1;
+            inputEl.value = '';
+            feedbackEl.innerText = '';
+            hintUsed = false; 
+            inputEl.focus();
+        } else {
+            endGame();
+        }
+    }
+
+    function showHint() {
+        keywordsEl.style.display = 'block';
+        hintBtn.style.display = 'none';
+        hintUsed = true; 
+        inputEl.focus();
+    }
+
+    function skipQuestion() {
+        currentIndex++;
+        loadQuestion();
+    }
+
+    function checkAnswer() {
+        const userAnswer = inputEl.value.replace(/《|》|\s/g, '').toLowerCase();
+        const correctAnswer = questions[currentIndex].answer.replace(/《|》|\s|·/g, '').toLowerCase();
+
+        if (userAnswer === '') return;
+
+        if (userAnswer === correctAnswer || (correctAnswer.includes(userAnswer) && userAnswer.length >= 2)) {
+            let pointsAwarded = hintUsed ? 1 : 2; 
+            score += pointsAwarded;
+            feedbackEl.innerText = "✅ 回答正确！(+" + pointsAwarded + "分)";
+            feedbackEl.className = "feedback correct";
+        } else {
+            feedbackEl.innerText = "❌ 正确答案是：《" + questions[currentIndex].answer + "》";
+            feedbackEl.className = "feedback wrong";
+        }
+
+        currentIndex++;
+        
+        setTimeout(() => {
+            loadQuestion();
+        }, 1500);
+    }
+
+    function endGame() {
+        clearInterval(timerId);
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('score').innerText = score;
+        
+        let evalText = "";
+        if(score >= 28) evalText = "🏆 真正的阅读大师！";
+        else if(score >= 17) evalText = "🌟 知识储备很棒！";
+        else evalText = "📚 还需要多读书哦！";
+        
+        document.getElementById('evaluation').innerText = evalText;
+    }
+
+    inputEl.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            checkAnswer();
+        }
+    });
+
+    shuffleQuestions();
+    startTimer();
+    loadQuestion();
+</script>
+
+</body>
+</html>
