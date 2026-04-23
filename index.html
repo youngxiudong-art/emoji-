@@ -87,6 +87,7 @@
             transition: opacity 0.3s;
         }
         button:hover { opacity: 0.8; }
+        .btn-start { background-color: #3498db; width: 100%; font-size: 18px; padding: 15px; margin-top: 20px; border-radius: 8px;}
         .btn-submit { background-color: #2ecc71; width: 100%; font-size: 16px; padding: 12px; margin-bottom: 10px; }
         .btn-hint { background-color: #f39c12; }
         .btn-skip { background-color: #3498db; }
@@ -99,18 +100,35 @@
         }
         .correct { color: #2ecc71; }
         .wrong { color: #e74c3c; }
-        #result-screen { display: none; }
+        
+        /* 初始隐藏游戏界面和结果界面 */
+        #game-screen, #result-screen { display: none; }
+        
         .final-score { font-size: 32px; color: #e74c3c; margin: 20px 0; }
+        .start-icon { font-size: 60px; margin: 20px 0; }
     </style>
 </head>
 <body>
+
+<div class="game-container" id="start-screen">
+    <h1>📚 世界读书日挑战</h1>
+    <div class="subtitle">看Emoji猜书名</div>
+    <div class="start-icon">🤔📖</div>
+    <p style="color: #555; font-size: 15px; line-height: 1.6;">
+        规则说明：<br>
+        1. 直接答对得 <strong>2</strong> 分。<br>
+        2. 点击提示后答对得 <strong>1</strong> 分。<br>
+        3. 答错、跳过不扣分，限时 <strong>15</strong> 分钟。
+    </p>
+    <button class="btn-start" onclick="startGame()">▶️ 开始游戏</button>
+</div>
 
 <div class="game-container" id="game-screen">
     <h1>📚 看Emoji猜书名</h1>
     <div class="subtitle">直接答对+2分，使用提示+1分</div>
     
     <div class="top-info">
-        <div class="progress">题目: <span id="current-q">1</span> / 17</div>
+        <div class="progress">题目: <span id="current-q">1</span> / 18</div>
         <div class="timer" id="timer-display">15:00</div>
     </div>
     
@@ -132,30 +150,31 @@
 
 <div class="game-container" id="result-screen">
     <h1>🎉 游戏结束！</h1>
-    <div class="final-score">本轮得分: <span id="score">0</span> / 34</div>
+    <div class="final-score">本轮得分: <span id="score">0</span> / 36</div>
     <p id="evaluation"></p>
     <button class="btn-submit" onclick="location.reload()">再玩一次</button>
 </div>
 
 <script>
     let questions = [
-        { emoji: "⬅️🚶‍♂️📓", keywords: "石猴、取经、八十一难", answer: "西游记" },
-        { emoji: "🕒🍲🧂👨‍⚕️", keywords: "桃园结义、赤壁、三分天下", answer: "三国演义" },
-        { emoji: "🔴🏢💭", keywords: "宝黛、大观园、石头记", answer: "红楼梦" },
-        { emoji: "💧🏞️📜", keywords: "梁山、一百零八将、替天行道", answer: "水浒传" },
-        { emoji: "🤏👑🧒", keywords: "B612星球、狐狸、玫瑰", answer: "小王子" },
-        { emoji: "👴🤝🌊", keywords: "圣地亚哥、出海、马林鱼", answer: "老人与海" },
-        { emoji: "💓🧍‍♂️", keywords: "福贵、苦难、韧性", answer: "活着" },
-        { emoji: "💯🗓️👤😔", keywords: "马孔多、七代人、宿命", answer: "百年孤独" },
-        { emoji: "🐛🔄📖", keywords: "格里高尔、甲虫、异化", answer: "变形记" },
-        { emoji: "🤴💀⚔️", keywords: "丹麦王子、装疯、复仇", answer: "哈姆雷特" },
-        { emoji: "🛡️🐎🌪️", keywords: "骑士、风车、桑丘", answer: "堂吉诃德" },
-        { emoji: "😐🌍", keywords: "孙少平、黄土高原、奋斗", answer: "平凡的世界" },
-        { emoji: "🏞️🧱", keywords: "茶峒、渡船、翠翠", answer: "边城" },
-        { emoji: "👍👍👨🏻‍💼", keywords: "盖茨比、绿光、爵士时代", answer: "了不起的盖茨比" },
-        { emoji: "🌾🌾👀🧑", keywords: "霍尔顿、红色猎人帽、叛逆", answer: "麦田里的守望者" },
-        { emoji: "🍃🌬️", keywords: "斯嘉丽、白瑞德、南北战争", answer: "飘" },
-        { emoji: "✂️❤️", keywords: "桑菲尔德庄园、阁楼、家庭教师", answer: "简爱" }
+        { emoji: "💧🐅🧱", keywords: "好汉", answer: "水浒传" },
+        { emoji: "☂️🪜", keywords: "脱水", answer: "三体" },
+        { emoji: "🧨🍊", keywords: "渡船", answer: "边城" },
+        { emoji: "🍎🍚🌍", keywords: "苦难", answer: "平凡的世界" },
+        { emoji: "🧃📓🛞", keywords: "剩余价值", answer: "资本论" },
+        { emoji: "🌲🍯🍄☠️", keywords: "羊皮卷", answer: "百年孤独" },
+        { emoji: "🥣🌰1️⃣5️⃣🍯", keywords: "历史", answer: "万历十五年" },
+        { emoji: "❄️🍊🐔", keywords: "这是最好的时代", answer: "双城记" },
+        { emoji: "🐘🤮🇨🇳", keywords: "差序格局", answer: "乡土中国" },
+        { emoji: "⌚️✂️🪨", keywords: "奇点", answer: "时间简史" },
+        { emoji: "🔴🐟⬛", keywords: "于连", answer: "红与黑" },
+        { emoji: "🍎🪓🛞", keywords: "看不见的手", answer: "国富论" },
+        { emoji: "🗣️", keywords: "救救孩子", answer: "呐喊" },
+        { emoji: "🍐🐘🍲", keywords: "哲学", answer: "理想国" },
+        { emoji: "🦏👊🌺", keywords: "唵", answer: "悉达多" },
+        { emoji: "😢🌧️", keywords: "繁漪", answer: "雷雨" },
+        { emoji: "🥤📦🐔", keywords: "红娘", answer: "西厢记" },
+        { emoji: "🍳😍", keywords: "桑菲尔德", answer: "简爱" }
     ];
 
     let currentIndex = 0;
@@ -171,6 +190,16 @@
     const feedbackEl = document.getElementById('feedback');
     const hintBtn = document.getElementById('hint-btn');
     const timerDisplay = document.getElementById('timer-display');
+
+    function startGame() {
+        // 隐藏开始界面，显示游戏界面
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+        
+        shuffleQuestions();
+        startTimer();
+        loadQuestion();
+    }
 
     function shuffleQuestions() {
         for (let i = questions.length - 1; i > 0; i--) {
@@ -252,8 +281,8 @@
         document.getElementById('score').innerText = score;
         
         let evalText = "";
-        if(score >= 28) evalText = "🏆 真正的阅读大师！";
-        else if(score >= 17) evalText = "🌟 知识储备很棒！";
+        if(score >= 30) evalText = "🏆 真正的阅读大师！";
+        else if(score >= 18) evalText = "🌟 知识储备很棒！";
         else evalText = "📚 还需要多读书哦！";
         
         document.getElementById('evaluation').innerText = evalText;
@@ -266,9 +295,6 @@
         }
     });
 
-    shuffleQuestions();
-    startTimer();
-    loadQuestion();
 </script>
 
 </body>
