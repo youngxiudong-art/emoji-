@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>🏆 实时排行榜</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; color: #333; padding: 40px; }
+        .board { background: #fff; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #2c3e50; margin-bottom: 30px; }
+        .team-row { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #eee; font-size: 20px; }
+        .team-row:first-child { font-weight: bold; color: #e74c3c; font-size: 26px; background-color: #fcf3f2; border-radius: 8px;}
+        .team-row:nth-child(2) { color: #d35400; font-weight: bold; }
+        .team-row:nth-child(3) { color: #f39c12; font-weight: bold; }
+        .btn-clear { background-color: #e74c3c; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 6px; cursor: pointer; margin-top: 30px; width: 100%;}
+    </style>
+</head>
+<body>
+
+<div class="board">
+    <h1>🏆 实时排行榜</h1>
+    <div id="list">
+        <p style="color:#777;">等待接收数据...</p>
+    </div>
+    <button class="btn-clear" onclick="clearData()">🗑️ 清除所有数据 (重新开始)</button>
+</div>
+
+<script>
+    // ⚠️ 注意：这里必须替换为你最终部署的后端服务器地址！
+    const SERVER_URL = "http://8.138.215.100:3000";;
+
+    function fetchScores() {
+        fetch(SERVER_URL + '/api/scores')
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById('list');
+            list.innerHTML = '';
+            if(data.length === 0) {
+                list.innerHTML = '<p style="color:#777;">暂无数据</p>';
+                return;
+            }
+            data.forEach((item, index) => {
+                let medal = index === 0 ? "🥇 " : (index === 1 ? "🥈 " : (index === 2 ? "🥉 " : ""));
+                list.innerHTML += `<div class="team-row"><span>${medal}${item.team}</span><span>${item.score} 分</span></div>`;
+            });
+        }).catch(e => console.log("连接服务器失败"));
+    }
+
+    function clearData() {
+        if(confirm("⚠️ 确定要清空排行榜吗？所有小组的分数将归零！")) {
+            fetch(SERVER_URL + '/api/clear', { method: 'POST' })
+            .then(() => fetchScores());
+        }
+    }
+
+    // 每3秒自动刷新一次数据
+    setInterval(fetchScores, 3000);
+    fetchScores();
+</script>
+</body>
+</html>

@@ -5,105 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>世界读书日：看Emoji猜书名</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .game-container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        .top-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-            font-size: 16px;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .game-container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        h1 { color: #2c3e50; font-size: 24px; margin-bottom: 5px; }
+        .subtitle { color: #7f8c8d; font-size: 14px; margin-bottom: 20px; }
+        .top-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; font-size: 16px; }
         .progress { color: #3498db; }
         .timer { color: #e74c3c; background: #fadbd8; padding: 5px 10px; border-radius: 6px; }
-        .emoji-display {
-            font-size: 48px;
-            margin: 20px 0;
-            letter-spacing: 5px;
-        }
-        .keywords {
-            font-size: 18px;
-            color: #e67e22;
-            margin-bottom: 20px;
-            font-weight: bold;
-            display: none;
-            min-height: 24px;
-        }
-        input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            outline: none;
-            text-align: center;
-        }
-        input[type="text"]:focus {
-            border-color: #3498db;
-        }
-        .btn-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-        button {
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            font-size: 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
+        .emoji-display { font-size: 48px; margin: 20px 0; letter-spacing: 5px; }
+        .keywords { font-size: 18px; color: #e67e22; margin-bottom: 20px; font-weight: bold; display: none; min-height: 24px; }
+        input[type="text"] { width: 80%; padding: 10px; font-size: 16px; border: 2px solid #bdc3c7; border-radius: 6px; margin-bottom: 20px; outline: none; text-align: center; }
+        input[type="text"]:focus { border-color: #3498db; }
+        .btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        button { color: white; border: none; padding: 10px 15px; font-size: 15px; border-radius: 6px; cursor: pointer; transition: opacity 0.3s; }
         button:hover { opacity: 0.8; }
         .btn-start { background-color: #3498db; width: 100%; font-size: 18px; padding: 15px; margin-top: 20px; border-radius: 8px;}
         .btn-submit { background-color: #2ecc71; width: 100%; font-size: 16px; padding: 12px; margin-bottom: 10px; }
         .btn-hint { background-color: #f39c12; }
         .btn-skip { background-color: #3498db; }
         .btn-end { background-color: #e74c3c; }
-        
-        .feedback {
-            margin-top: 10px;
-            font-weight: bold;
-            min-height: 24px;
-        }
+        .feedback { margin-top: 10px; font-weight: bold; min-height: 24px; }
         .correct { color: #2ecc71; }
         .wrong { color: #e74c3c; }
-        
-        /* 初始隐藏游戏界面和结果界面 */
         #game-screen, #result-screen { display: none; }
-        
         .final-score { font-size: 32px; color: #e74c3c; margin: 20px 0; }
         .start-icon { font-size: 60px; margin: 20px 0; }
     </style>
@@ -120,31 +44,27 @@
         2. 点击提示后答对得 <strong>1</strong> 分。<br>
         3. 答错、跳过不扣分，限时 <strong>15</strong> 分钟。
     </p>
+    
+    <input type="text" id="team-name" placeholder="请输入小组名称 (必填)" autocomplete="off">
     <button class="btn-start" onclick="startGame()">▶️ 开始游戏</button>
 </div>
 
 <div class="game-container" id="game-screen">
     <h1>📚 看Emoji猜书名</h1>
     <div class="subtitle">直接答对+2分，使用提示+1分</div>
-    
     <div class="top-info">
         <div class="progress">题目: <span id="current-q">1</span> / 18</div>
         <div class="timer" id="timer-display">15:00</div>
     </div>
-    
     <div class="emoji-display" id="emoji"></div>
     <div class="keywords" id="keywords"></div>
-    
     <input type="text" id="answer-input" placeholder="请输入书名 (无需书名号)" autocomplete="off">
-    
     <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
-    
     <div class="btn-group">
         <button class="btn-hint" id="hint-btn" onclick="showHint()">💡 提示</button>
         <button class="btn-skip" onclick="skipQuestion()">⏭️ 跳过</button>
         <button class="btn-end" onclick="endGame()">🛑 结束游戏</button>
     </div>
-    
     <div class="feedback" id="feedback"></div>
 </div>
 
@@ -156,6 +76,9 @@
 </div>
 
 <script>
+    // ⚠️ 注意：这里必须替换为你最终部署的后端服务器地址！
+    const SERVER_URL = "http://8.138.215.100:3000";; 
+
     let questions = [
         { emoji: "💧🐅🧱", keywords: "好汉", answer: "水浒传" },
         { emoji: "☂️🪜", keywords: "脱水", answer: "三体" },
@@ -177,11 +100,8 @@
         { emoji: "🍳😍", keywords: "桑菲尔德", answer: "简爱" }
     ];
 
-    let currentIndex = 0;
-    let score = 0;
-    let timerId;
-    let timeLeft = 15 * 60;
-    let hintUsed = false; 
+    let currentIndex = 0, score = 0, timerId, timeLeft = 15 * 60, hintUsed = false; 
+    let teamName = "";
 
     const emojiEl = document.getElementById('emoji');
     const keywordsEl = document.getElementById('keywords');
@@ -192,10 +112,13 @@
     const timerDisplay = document.getElementById('timer-display');
 
     function startGame() {
-        // 隐藏开始界面，显示游戏界面
+        teamName = document.getElementById('team-name').value.trim();
+        if(!teamName) {
+            alert("请先输入小组名称！");
+            return;
+        }
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'block';
-        
         shuffleQuestions();
         startTimer();
         loadQuestion();
@@ -214,11 +137,7 @@
             let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
             let s = (timeLeft % 60).toString().padStart(2, '0');
             timerDisplay.innerText = m + ":" + s;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerId);
-                endGame();
-            }
+            if (timeLeft <= 0) { clearInterval(timerId); endGame(); }
         }, 1000);
     }
 
@@ -226,7 +145,6 @@
         if (currentIndex < questions.length) {
             emojiEl.innerText = questions[currentIndex].emoji;
             keywordsEl.innerText = questions[currentIndex].keywords;
-            
             keywordsEl.style.display = 'none';
             hintBtn.style.display = 'inline-block';
             currentQEl.innerText = currentIndex + 1;
@@ -246,15 +164,11 @@
         inputEl.focus();
     }
 
-    function skipQuestion() {
-        currentIndex++;
-        loadQuestion();
-    }
+    function skipQuestion() { currentIndex++; loadQuestion(); }
 
     function checkAnswer() {
         const userAnswer = inputEl.value.replace(/《|》|\s/g, '').toLowerCase();
         const correctAnswer = questions[currentIndex].answer.replace(/《|》|\s|·/g, '').toLowerCase();
-
         if (userAnswer === '') return;
 
         if (userAnswer === correctAnswer || (correctAnswer.includes(userAnswer) && userAnswer.length >= 2)) {
@@ -266,12 +180,8 @@
             feedbackEl.innerText = "❌ 正确答案是：《" + questions[currentIndex].answer + "》";
             feedbackEl.className = "feedback wrong";
         }
-
         currentIndex++;
-        
-        setTimeout(() => {
-            loadQuestion();
-        }, 1500);
+        setTimeout(() => { loadQuestion(); }, 1500);
     }
 
     function endGame() {
@@ -284,18 +194,19 @@
         if(score >= 30) evalText = "🏆 真正的阅读大师！";
         else if(score >= 18) evalText = "🌟 知识储备很棒！";
         else evalText = "📚 还需要多读书哦！";
-        
         document.getElementById('evaluation').innerText = evalText;
+
+        // 向服务器上传成绩
+        fetch(SERVER_URL + '/api/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ team: teamName, score: score })
+        }).then(() => console.log("上传成功")).catch(err => console.log("上传失败"));
     }
 
     inputEl.addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            checkAnswer();
-        }
+        if (event.key === "Enter") { event.preventDefault(); checkAnswer(); }
     });
-
 </script>
-
 </body>
 </html>
